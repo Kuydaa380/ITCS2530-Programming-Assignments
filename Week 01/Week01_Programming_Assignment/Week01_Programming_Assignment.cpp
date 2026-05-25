@@ -1,3 +1,8 @@
+// Andrew Kuyda
+// ITCS 2530
+// Prof. Koss
+// 5/25/2026
+
 #include <iostream>
 
 using namespace std;
