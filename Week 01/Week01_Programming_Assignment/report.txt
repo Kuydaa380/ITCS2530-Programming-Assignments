@@ -1,0 +1,8 @@
+#######################################
+#     Snow Globe Tracking Summary     #
+#######################################
+Favorite Globe:          dd f           
+Next Destination:        fef            
+States Collected:        12             
+States Remaining:        38             
+#######################################
