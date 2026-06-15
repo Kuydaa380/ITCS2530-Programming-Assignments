@@ -1,8 +1,8 @@
 #######################################
 #     Snow Globe Tracking Summary     #
 #######################################
-Favorite Globe:          Michigan       
-Next Destination:        Ohio           
-States Collected:        12             
-States Remaining:        38             
+Favorite Globe:          Ohio           
+Next Destination:        Michigan       
+States Collected:        14             
+States Remaining:        36             
 #######################################
