@@ -3,6 +3,6 @@
 #######################################
 Favorite Globe:          Michigan       
 Next Destination:        Ohio           
-States Collected:        12             
-States Remaining:        38             
+States Collected:        13             
+States Remaining:        37             
 #######################################
