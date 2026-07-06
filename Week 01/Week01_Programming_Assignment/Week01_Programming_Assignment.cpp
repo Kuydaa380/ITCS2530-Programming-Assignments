@@ -1,7 +1,7 @@
 // Andrew Kuyda
 // ITCS 2530
 // Prof. Koss
-// 6/20/2026
+// 7/5/2026
 
 #include <iostream>
 #include <iomanip>
@@ -16,17 +16,26 @@ const string REPORTFILE = "report.txt";
 //Menu options values
 const int MENU_VIEW = 1;
 const int MENU_SAVE = 2;
-const int MENU_COLLECTION = 3; //NEW
+const int MENU_COLLECTION = 3;
 
 const int MENU_YES = 1;
 const int MENU_NO = 2;
 
 //Number of current states
-int const numStates = 50;
-const int MAX_COLLECTION = 50; //NEW
+const int numStates = 50;
+const int MAX_COLLECTION = 50;
 
-//NEW - Collector experience level
+//Collector experience level
 enum CollectorLevel {BEGINNER, INTERMEDIATE, EXPERT};
+
+//NEW - Struct that combines and stores snow globe collection variables
+struct SnowGlobe
+{
+	string state;
+	string city;
+	int yearCollected;
+	CollectorLevel level;
+};
 
 //Function to change colors in functions that call it
 void setColor(int color)
@@ -100,7 +109,7 @@ int getVisitedStates()
 }
 
 
-//NEW - Function to determine collector level based on enum skill rating
+//Function to determine collector level based on enum skill rating
 CollectorLevel getCollectorLevel(int visitedState)
 {
 	if (visitedState <= 15)
@@ -113,42 +122,72 @@ CollectorLevel getCollectorLevel(int visitedState)
 
 
 //NEW - Function that uses an array to store user input about which states they got each of their snowglobes from
-void fillCollection(string collection[], int size)
+void fillCollection(SnowGlobe collection[], int size)
 {
 	cin.ignore();
 
 	for (int i = 0; i < size; i++)
 	{
-		do
+		setColor(10); // Green
+
+		cout << "\nSnow Globe #" << i + 1 << endl;
+
+		cout << "State: ";
+
+		setColor(7); // Reser to White
+
+		getline(cin, collection[i].state);
+
+		while (collection[i].state.empty())
 		{
-			setColor(10); // Green
+			cout << "State cannot be blank: ";
+			getline(cin, collection[i].state);
+		}
 
-			cout << "Enter state for snow globe #" << i + 1 << ": ";
+		setColor(10); // Green
 
-			setColor(7); // Reset to White
+		cout << "City Purchased: ";
 
-			getline(cin, collection[i]);
+		setColor(7); // Reset to White
 
-			if (collection[i].empty())
-				cout << "State name cannot be blank." << endl;
+		getline(cin, collection[i].city);
 
-		} while (collection[i].empty());
+		while (collection[i].city.empty())
+		{
+			cout << "City cannot be blank: ";
+			getline(cin, collection[i].city);
+		}
+
+		setColor(10); // Green
+
+		cout << "Year Collected: ";
+
+		setColor(7); // Reset to White
+
+		cin >> collection[i].yearCollected;
+		cin.ignore();
+
+		collection[i].level = getCollectorLevel(size);
 	}
 }
 
 
 //NEW - Function to display the array of the snow globe collection
-void displayCollection(string collection[], int size)
+void displayCollection(SnowGlobe collection[], int size)
 {
 	setColor(11); // Cyan
 
 	cout << endl;
-	cout << "   Collected Snow Globes   " << endl;
-	cout << "---------------------------" << endl;
+	cout << "Collected Snow Globes" << endl;
+	cout << "---------------------" << endl;
 
 	for (int i = 0; i < size; i++)
 	{
-		cout << i + 1 << ". " << collection[i] << endl;
+		cout << i + 1 << ". "
+			<< collection[i].state
+			<< " | City: " << collection[i].city
+			<< " | Year: " << collection[i].yearCollected
+			<< endl;
 	}
 
 	cout << endl;
@@ -156,22 +195,23 @@ void displayCollection(string collection[], int size)
 	setColor(7); // Reset to White
 }
 
+
 //NEW - Array calculation that finds the longest and shortest state names
-void findLongestAndShortest(string collection[], int size)
+void findLongestAndShortest(SnowGlobe collection[], int size)
 {
 	if (size <= 0)
 		return;
 
-	string longest = collection[0];
-	string shortest = collection[0];
+	string longest = collection[0].state;
+	string shortest = collection[0].state;
 
 	for (int i = 1; i < size; i++)
 	{
-		if (collection[i].length() > longest.length())
-			longest = collection[i];
+		if (collection[i].state.length() > longest.length())
+			longest = collection[i].state;
 
-		if (collection[i].length() < shortest.length())
-			shortest = collection[i];
+		if (collection[i].state.length() < shortest.length())
+			shortest = collection[i].state;
 	}
 
 	setColor(14); // Yellow
@@ -188,7 +228,6 @@ void findLongestAndShortest(string collection[], int size)
 
 	setColor(7); // Reset to White
 }
-
 
 //Function to output statement based on previous user inputs
 void displayStatesBreakdown(string favGlobe, string bestDest, int visitedState)
@@ -220,7 +259,9 @@ void progressBar(int visitedState)
 	cout << "This is your current progress towards your collections completion!" << endl << endl;
 
 	setColor(11); // Cyan
+
 	cout << "Progress: [";
+
 	for (int colProg = 0; colProg < numStates; colProg++)
 	{
 		if (colProg < visitedState)
@@ -229,6 +270,7 @@ void progressBar(int visitedState)
 			cout << "_";
 	}
 	cout << "] " << visitedState << "/" << numStates << endl << endl;
+
 	setColor(7); // Reset to White
 }
 
@@ -241,7 +283,7 @@ void displaySummary(string favGlobe, string bestDest, int visitedState)
 	cout << "#######################################" << endl;
 	cout << "#     Snow Globe Tracking Summary     #" << endl;
 	cout << "#######################################" << endl;
-
+	
 	cout << left;
 
 	cout << setw(25) << "Favorite Globe:" << setw(15) << favGlobe << endl;
@@ -249,7 +291,7 @@ void displaySummary(string favGlobe, string bestDest, int visitedState)
 	cout << setw(25) << "States Collected:" << setw(15) << visitedState << endl;
 	cout << setw(25) << "States Remaining:" << setw(15) << numStates - visitedState << endl;
 
-	//NEW - Enum collector level being used in a switch structure
+	//Enum collector level being used in a switch structure
 	cout << setw(25) << "Collector Level:";
 
 	CollectorLevel level = getCollectorLevel(visitedState);
@@ -271,17 +313,18 @@ void displaySummary(string favGlobe, string bestDest, int visitedState)
 
 	cout << endl;
 	cout << "#######################################";
-
+	
 	setColor(7); // Reset to White
 }
 
 
-//Function to save summary to report file with file check
-void saveReport(string favGlobe, string bestDest, int visitedState, string collection[])
+//NEW - Function to save summary to report file with file check
+void saveReport(string favGlobe, string bestDest, int visitedState, SnowGlobe collection[])
 {
 	ofstream fReport;
 
 	fReport.open(REPORTFILE);
+
 	if (!fReport)
 	{
 		cout << "Error opening Report File:" << endl;
@@ -297,9 +340,9 @@ void saveReport(string favGlobe, string bestDest, int visitedState, string colle
 	fReport << setw(25) << "Favorite Globe:" << setw(15) << favGlobe << endl;
 	fReport << setw(25) << "Next Destination:" << setw(15) << bestDest << endl;
 	fReport << setw(25) << "States Collected:" << setw(15) << visitedState << endl;
-	fReport << setw(25) << "States Remaining:" << setw(15) << (numStates - visitedState) << endl;
-
-	//NEW - Enum collector level is included along with array contents of collected snow globes
+	fReport << setw(25) << "States Remaining:" << setw(15) << numStates - visitedState << endl;
+	
+	//Enum collector level is included along with array contents of collected snow globes
 	CollectorLevel level = getCollectorLevel(visitedState);
 
 	fReport << setw(25) << "Collector Level:";
@@ -322,23 +365,30 @@ void saveReport(string favGlobe, string bestDest, int visitedState, string colle
 	fReport << endl << endl;
 
 	fReport << "Collected Snow Globes" << endl;
-	fReport << "----------------------" << endl;
+	fReport << "---------------------" << endl;
 
 	for (int i = 0; i < visitedState; i++)
 	{
-		fReport << i + 1 << ". " << collection[i] << endl;
+		fReport << i + 1 << ". "
+			<< collection[i].state
+			<< " | "
+			<< collection[i].city
+			<< " | "
+			<< collection[i].yearCollected
+			<< endl;
 	}
 
 	fReport.close();
 
 	setColor(10); // Green
+
 	cout << "Summary saved!" << endl;
+
 	setColor(7); // Reset to White
 }
 
-
-//Function for a do while loop to display menu options
-void displayMenu(string favGlobe, string bestDest, int visitedState, string collection[])
+//NEW - Function for a do while loop to display menu options
+void displayMenu(string favGlobe, string bestDest, int visitedState, SnowGlobe collection[])
 {
 	int menuNum;
 	int menuOption = 0;
@@ -350,6 +400,7 @@ void displayMenu(string favGlobe, string bestDest, int visitedState, string coll
 		cout << MENU_VIEW << ": View your summary table." << endl;
 		cout << MENU_SAVE << ": Save your summary table." << endl;
 		cout << MENU_COLLECTION << ": View collected snow globes." << endl << endl;
+
 		cin >> menuNum;
 
 		cout << endl;
@@ -364,7 +415,6 @@ void displayMenu(string favGlobe, string bestDest, int visitedState, string coll
 			saveReport(favGlobe, bestDest, visitedState, collection);
 			break;
 
-		//NEW - Menu option to display array of snow globe collection
 		case MENU_COLLECTION:
 			displayCollection(collection, visitedState);
 			break;
@@ -378,6 +428,7 @@ void displayMenu(string favGlobe, string bestDest, int visitedState, string coll
 		cout << "Would you like to return to the menu?" << endl;
 		cout << MENU_YES << ": Type '1' for Yes" << endl;
 		cout << MENU_NO << ": Type '2' for No" << endl;
+
 		cin >> menuOption;
 
 		cout << endl;
@@ -405,7 +456,7 @@ int main()
 	int visitedState = getVisitedStates();
 
 	//NEW - Array to store collected states
-	string collection[MAX_COLLECTION];
+	SnowGlobe collection[MAX_COLLECTION];
 
 	fillCollection(collection, visitedState);
 
