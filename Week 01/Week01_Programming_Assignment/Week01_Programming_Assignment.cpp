@@ -1,7 +1,7 @@
 // Andrew Kuyda
 // ITCS 2530
 // Prof. Koss
-// 6/20/2026
+// 7/5/2026
 
 #include <iostream>
 #include <iomanip>
@@ -16,14 +16,19 @@ const string REPORTFILE = "report.txt";
 //Menu options values
 const int MENU_VIEW = 1;
 const int MENU_SAVE = 2;
+const int MENU_COLLECTION = 3; //NEW
 
 const int MENU_YES = 1;
 const int MENU_NO = 2;
 
 //Number of current states
 int const numStates = 50;
+const int MAX_COLLECTION = 50; //NEW
 
-//***WEEK 05 - Function to change colors in functions that call it
+//NEW - Collector experience level
+enum CollectorLevel {BEGINNER, INTERMEDIATE, EXPERT};
+
+//Function to change colors in functions that call it
 void setColor(int color)
 {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -95,7 +100,97 @@ int getVisitedStates()
 }
 
 
-//***WEEK 05 - Function to output statement based on previous user inputs
+//NEW - Function to determine collector level based on enum skill rating
+CollectorLevel getCollectorLevel(int visitedState)
+{
+	if (visitedState <= 15)
+		return BEGINNER;
+	else if (visitedState <= 35)
+		return INTERMEDIATE;
+	else
+		return EXPERT;
+}
+
+
+//NEW - Function that uses an array to store user input about which states they got each of their snowglobes from
+void fillCollection(string collection[], int size)
+{
+	cin.ignore();
+
+	for (int i = 0; i < size; i++)
+	{
+		do
+		{
+			setColor(10); // Green
+
+			cout << "Enter state for snow globe #" << i + 1 << ": ";
+
+			setColor(7); // Reset to White
+
+			getline(cin, collection[i]);
+
+			if (collection[i].empty())
+				cout << "State name cannot be blank." << endl;
+
+		} while (collection[i].empty());
+	}
+}
+
+
+//NEW - Function to display the array of the snow globe collection
+void displayCollection(string collection[], int size)
+{
+	setColor(11); // Cyan
+
+	cout << endl;
+	cout << "   Collected Snow Globes   " << endl;
+	cout << "---------------------------" << endl;
+
+	for (int i = 0; i < size; i++)
+	{
+		cout << i + 1 << ". " << collection[i] << endl;
+	}
+
+	cout << endl;
+
+	setColor(7); // Reset to White
+}
+
+//NEW - Array calculation that finds the longest and shortest state names
+void findLongestAndShortest(string collection[], int size)
+{
+	if (size <= 0)
+		return;
+
+	string longest = collection[0];
+	string shortest = collection[0];
+
+	for (int i = 1; i < size; i++)
+	{
+		if (collection[i].length() > longest.length())
+			longest = collection[i];
+
+		if (collection[i].length() < shortest.length())
+			shortest = collection[i];
+	}
+
+	setColor(14); // Yellow
+
+	cout << endl;
+
+	cout << left;
+
+	cout << "          Array Calculation Results          " << endl;
+	cout << "---------------------------------------------" << endl;
+	cout << setw(25) << "Longest State Name:" << setw(15) << longest << endl;
+	cout << setw(25) << "Shortest State Name:" << setw(15) << shortest << endl;
+	cout << endl;
+
+	setColor(7); // Reset to White
+}
+
+
+//Function to output statement based on previous user inputs
 void displayStatesBreakdown(string favGlobe, string bestDest, int visitedState)
 {
 	cout << endl << "So far we've ascertained that your favorite snow globe is from " << favGlobe << ", and that you're most likely to travel to " << bestDest << " next." << endl;
@@ -150,6 +245,28 @@ void displaySummary(string favGlobe, string bestDest, int visitedState)
 	cout << setw(25) << "Next Destination:" << setw(15) << bestDest << endl;
 	cout << setw(25) << "States Collected:" << setw(15) << visitedState << endl;
 	cout << setw(25) << "States Remaining:" << setw(15) << numStates - visitedState << endl;
+
+	//NEW - Enum collector level being used in a switch structure
+	cout << setw(25) << "Collector Level:";
+
+	CollectorLevel level = getCollectorLevel(visitedState);
+
+	switch (level)
+	{
+	case BEGINNER:
+		cout << "Beginner";
+		break;
+
+	case INTERMEDIATE:
+		cout << "Intermediate";
+		break;
+
+	case EXPERT:
+		cout << "Expert";
+		break;
+	}
+
+	cout << endl;
 	cout << "#######################################";
 	setColor(7); // Reset to White
 }
@@ -174,7 +291,36 @@ void saveReport(string favGlobe, string bestDest, int visitedState)
 	fReport << setw(25) << "Next Destination:" << setw(15) << bestDest << endl;
 	fReport << setw(25) << "States Collected:" << setw(15) << visitedState << endl;
 	fReport << setw(25) << "States Remaining:" << setw(15) << (numStates - visitedState) << endl;
-	fReport << "#######################################" << endl;
+
+	//NEW - Enum collector level is included along with array contents of collected snow globes
+	CollectorLevel level = getCollectorLevel(visitedState);
+
+	fReport << setw(25) << "Collector Level:";
+
+	switch (level)
+	{
+	case BEGINNER:
+		fReport << "Beginner";
+		break;
+
+	case INTERMEDIATE:
+		fReport << "Intermediate";
+		break;
+
+	case EXPERT:
+		fReport << "Expert";
+		break;
+	}
+
+	fReport << endl << endl;
+
+	fReport << "Collected Snow Globes" << endl;
+	fReport << "----------------------" << endl;
+
+	for (int i = 0; i < visitedState; i++)
+	{
+		fReport << i + 1 << ". " << collection[i] << endl;
+	}
 
 	fReport.close();
 
@@ -206,7 +352,12 @@ void displayMenu(string favGlobe, string bestDest, int visitedState)
 			break;
 
 		case MENU_SAVE:
-			saveReport(favGlobe, bestDest, visitedState);
+			saveReport(favGlobe, bestDest, visitedState, collection);
+			break;
+
+		//NEW - Menu option to display array of snow globe collection
+		case MENU_COLLECTION:
+			displayCollection(collection, visitedState);
 			break;
 
 		default:
@@ -243,6 +394,13 @@ int main()
 
 	int visitedState = getVisitedStates();
 
+	//NEW - Array to store collected states
+	string collection[MAX_COLLECTION];
+
+	fillCollection(collection, visitedState);
+
+	findLongestAndShortest(collection, visitedState);
+
 	displayStatesBreakdown(favGlobe, bestDest, visitedState);
 
 	displayStatesFeedback(visitedState, favGlobe);
@@ -254,6 +412,144 @@ int main()
 	return 0;
 }
 
+// State Tracker: Michigan, Ohio, Indiana, Pennsylvania, 
+// Florida, Alabama, Georgia, North Carolina, Minnesota, 
+// Colorado, New Mexico, Utah, and Mississippi. (13)
+
+// 7 = White (default color)
+// 8 = Gray
+// 9 = Bright Blue
+// 10 = Bright Green
+// 11 = Bright Cyan
+// 12 = Bright Red
+// 13 = Bright Magenta
+// 14 = Bright Yellow
+// 15 = Bright White
+
+
+// Andrew Kuyda
+// ITCS 2530
+// Prof. Koss
+// 6/20/2026
+
+#include <iostream>
+#include <iomanip>
+#include <string>
+#include <fstream>
+#include <windows.h>
+
+using namespace std;
+
+const string REPORTFILE = "report.txt";
+
+//Menu options values
+const int MENU_VIEW = 1;
+const int MENU_SAVE = 2;
+const int MENU_COLLECTION = 3;
+
+const int MENU_YES = 1;
+const int MENU_NO = 2;
+
+//Number of current states
+const int numStates = 50;
+const int MAX_COLLECTION = 50;
+
+//Collector experience level
+enum CollectorLevel { BEGINNER, INTERMEDIATE, EXPERT };
+
+//*********************** NEW STRUCT ************************
+struct SnowGlobe
+{
+	string state;
+	string city;
+	int yearCollected;
+	CollectorLevel level;
+};
+//***********************************************************
+
+//Function to change colors in functions that call it
+void setColor(int color)
+{
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, color);
+}
+
+//Function to display and set color of the welcome banner
+void displayBanner()
+{
+	setColor(11);
+	cout << "'~.,.~'~.,.~'~.,.~'~.,.~'~.,.~'" << endl;
+	cout << "'Welcome to Snowglobe Tracker '" << endl;
+	cout << ".~.,.~.,.~.,.~.,.~.,.~.,.~.,.~." << endl << endl;
+	setColor(7);
+}
+
+//Function to input users favorite snow globe
+string getFavGlobe()
+{
+	string favGlobe;
+
+	setColor(10);
+	cout << "What State is your favorite snow globe from?" << endl << endl;
+	setColor(7);
+
+	getline(cin, favGlobe);
+
+	cout << endl << "Of course! " << favGlobe
+		<< " is a great State!" << endl;
+
+	return favGlobe;
+}
+
+//Function to get destination user would most likely visit next
+string getBestDest()
+{
+	string bestDest;
+
+	setColor(10);
+	cout << "What state would you most like to visit next?" << endl << endl;
+	setColor(7);
+
+	getline(cin, bestDest);
+
+	cout << endl << "Ahhh, " << bestDest
+		<< " is a fantastic place to visit!" << endl << endl;
+
+	return bestDest;
+}
+
+//Function to track number of states visited so far
+int getVisitedStates()
+{
+	int visitedState = 0;
+
+	setColor(10);
+	cout << "How many states do you already have snow globes from?"
+		<< endl << "Enter a number: ";
+	setColor(7);
+
+	cin >> visitedState;
+
+	while (visitedState <= 0 || visitedState > numStates)
+	{
+		cout << "Please enter the number of states you have visited:"
+			<< endl;
+		cin >> visitedState;
+	}
+
+	return visitedState;
+}
+
+//Function to determine collector level
+CollectorLevel getCollectorLevel(int visitedState)
+{
+	if (visitedState <= 15)
+		return BEGINNER;
+	else if (visitedState <= 35)
+		return INTERMEDIATE;
+	else
+		return EXPERT;
+}
 
 // State Tracker: Michigan, Ohio, Indiana, Pennsylvania, 
 // Florida, Alabama, Georgia, North Carolina, Minnesota, 
