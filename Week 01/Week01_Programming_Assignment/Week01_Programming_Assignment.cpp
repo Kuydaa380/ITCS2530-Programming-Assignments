@@ -285,6 +285,7 @@ void displaySummary(string favGlobe, string bestDest, int visitedState)
 	cout << "#######################################" << endl;
 	
 	cout << left;
+
 	cout << setw(25) << "Favorite Globe:" << setw(15) << favGlobe << endl;
 	cout << setw(25) << "Next Destination:" << setw(15) << bestDest << endl;
 	cout << setw(25) << "States Collected:" << setw(15) << visitedState << endl;
